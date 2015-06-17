@@ -1,0 +1,7 @@
+language: go
+
+before_script:
+  - echo 'token: fake-token' > ~/.mktmpio.yml
+go:
+  - 1.4
+  - tip
