@@ -12,8 +12,14 @@ type Config struct {
 
 func LoadConfig() (error, Config) {
 	config := Config{}
-	user, _ := user.Current()
+	user, err := user.Current()
+	if err != nil {
+		return err, config
+	}
 	cfgFile, err := ioutil.ReadFile(user.HomeDir + "/.mktmpio.yml")
+	if err != nil {
+		return err, config
+	}
 	err = yaml.Unmarshal(cfgFile, &config)
 	return err, config
 }
