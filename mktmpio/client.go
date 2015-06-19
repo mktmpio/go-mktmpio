@@ -14,6 +14,8 @@ type Client struct {
 	url   string
 }
 
+const MKTMPIO_URL = "https://mktmp.io/"
+
 func NewClient() (error, *Client) {
 	err, cfg := LoadConfig()
 	if err != nil {
@@ -21,7 +23,7 @@ func NewClient() (error, *Client) {
 	}
 	client := Client{
 		token: cfg.Token,
-		url:   "https://mktmp.io/",
+		url:   MKTMPIO_URL,
 	}
 	return nil, &client
 }

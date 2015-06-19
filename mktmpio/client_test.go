@@ -33,3 +33,21 @@ func TestClientCreate(t *testing.T) {
 		t.Error("client.Create returned an instance:", instance)
 	}
 }
+
+func TestBadCredentialsClient(t *testing.T) {
+	err, client := NewClient()
+	if err != nil {
+		t.Error("NewClient returned an error")
+	}
+	if client == nil {
+		t.Error("NewClient returned a nil client")
+	}
+	client.token = "this is a bad token"
+	err, instance := client.Create("redis")
+	if err == nil {
+		t.Error("client.Create did not return an error")
+	}
+	if instance != nil {
+		t.Error("client.Create returned an instance:", instance)
+	}
+}
