@@ -7,10 +7,9 @@ import (
 func TestConfigLoading(t *testing.T) {
 	err, cfg := LoadConfig()
 	if err != nil {
-		t.Fail()
+		t.Error("LoadConfig returned an error:", err)
 	}
 	if len(cfg.Token) < 10 {
-		t.Fail()
+		t.Error("config token too short:", cfg)
 	}
-	t.Logf("client: %v\n", cfg)
 }
