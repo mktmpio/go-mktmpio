@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 )
 
@@ -45,22 +46,16 @@ func (i *Instance) Cmd() *exec.Cmd {
 // that contain the host, port and credentials required for connecting to the
 // remote server represented by the Instance.
 func (i *Instance) LoadEnv() error {
-	err := os.Setenv(envKey(i, "host"), i.Host)
-	if err != nil {
-		return err
+	var err error
+	setEnv := func(key, val string) {
+		if err == nil {
+			err = os.Setenv(envKey(i, key), val)
+		}
 	}
-	err = os.Setenv(envKey(i, "port"), fmt.Sprintf("%d", i.Port))
-	if err != nil {
-		return err
-	}
-	err = os.Setenv(envKey(i, "username"), i.Username)
-	if err != nil {
-		return err
-	}
-	err = os.Setenv(envKey(i, "password"), i.Password)
-	if err != nil {
-		return err
-	}
+	setEnv("host", i.Host)
+	setEnv("port", strconv.Itoa(i.Port))
+	setEnv("username", i.Username)
+	setEnv("password", i.Password)
 	return err
 }
 
