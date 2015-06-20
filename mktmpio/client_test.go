@@ -5,7 +5,7 @@ import (
 )
 
 func TestNewClient(t *testing.T) {
-	err, client := NewClient()
+	client, err := NewClient()
 	if err != nil {
 		t.Error("NewClient returned an error:", err)
 	}
@@ -18,14 +18,14 @@ func TestNewClient(t *testing.T) {
 }
 
 func TestClientCreate(t *testing.T) {
-	err, client := NewClient()
+	client, err := NewClient()
 	if err != nil {
 		t.Error("NewClient returned an error")
 	}
 	if client == nil {
 		t.Error("NewClient returned a nil client")
 	}
-	err, instance := client.Create("definitely unsupported")
+	instance, err := client.Create("definitely unsupported")
 	if err == nil {
 		t.Error("client.Create did not return an error")
 	}
@@ -35,7 +35,7 @@ func TestClientCreate(t *testing.T) {
 }
 
 func TestBadCredentialsClient(t *testing.T) {
-	err, client := NewClient()
+	client, err := NewClient()
 	if err != nil {
 		t.Error("NewClient returned an error")
 	}
@@ -43,7 +43,7 @@ func TestBadCredentialsClient(t *testing.T) {
 		t.Error("NewClient returned a nil client")
 	}
 	client.token = "this is a bad token"
-	err, instance := client.Create("redis")
+	instance, err := client.Create("redis")
 	if err == nil {
 		t.Error("client.Create did not return an error")
 	}

@@ -7,8 +7,9 @@ import (
 	"strings"
 )
 
+// Instance represents a server that has been created on the mktmpio service.
 type Instance struct {
-	Id          string `json:"id,omitempty"`
+	ID          string `json:"id,omitempty"`
 	Host        string `json:"host,omitempty"`
 	Port        int    `json:"port,omitempty"`
 	Error       string `json:"error,omitempty"`
@@ -24,10 +25,14 @@ type shell struct {
 	Env []interface{} `json:"env,omitempty"`
 }
 
+// Destroy the server on the mktmpio service
 func (i *Instance) Destroy() {
-	i.client.Destroy(i.Id)
+	i.client.Destroy(i.ID)
 }
 
+// Cmd returns an exec.Cmd that is pre-populated with the command, arguments,
+// and environment variables required for spawning a local shell connected to
+// the remote server.
 func (i *Instance) Cmd() *exec.Cmd {
 	args := make([]string, len(i.RemoteShell.Cmd))
 	for i, a := range i.RemoteShell.Cmd {
@@ -36,6 +41,9 @@ func (i *Instance) Cmd() *exec.Cmd {
 	return exec.Command(args[0], args[1:]...)
 }
 
+// LoadEnv modifies the current environment by setting environment variables
+// that contain the host, port and credentials required for connecting to the
+// remote server represented by the Instance.
 func (i *Instance) LoadEnv() error {
 	err := os.Setenv(envKey(i, "host"), i.Host)
 	if err != nil {

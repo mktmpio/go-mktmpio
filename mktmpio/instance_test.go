@@ -7,7 +7,7 @@ import (
 
 func TestLoadEnv(t *testing.T) {
 	instance := Instance{
-		Id:       "someId",
+		ID:       "someId",
 		Host:     "some-host",
 		Port:     1234,
 		Type:     "mktmpdb",
