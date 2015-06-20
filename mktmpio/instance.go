@@ -22,8 +22,8 @@ type Instance struct {
 }
 
 type shell struct {
-	Cmd []interface{} `json:"cmd,omitempty"`
-	Env []interface{} `json:"env,omitempty"`
+	Cmd []interface{}     `json:"cmd,omitempty"`
+	Env map[string]string `json:"env,omitempty"`
 }
 
 // Destroy the server on the mktmpio service
@@ -39,7 +39,11 @@ func (i *Instance) Cmd() *exec.Cmd {
 	for i, a := range i.RemoteShell.Cmd {
 		args[i] = fmt.Sprintf("%v", a)
 	}
-	return exec.Command(args[0], args[1:]...)
+	cmd := exec.Command(args[0], args[1:]...)
+	if len(i.RemoteShell.Env) > 0 {
+		cmd.Env = append(os.Environ(), envList(i.RemoteShell.Env)...)
+	}
+	return cmd
 }
 
 // LoadEnv modifies the current environment by setting environment variables
@@ -61,4 +65,12 @@ func (i *Instance) LoadEnv() error {
 
 func envKey(i *Instance, field interface{}) string {
 	return strings.ToUpper(fmt.Sprintf("%s_%s", i.Type, field))
+}
+
+func envList(kv map[string]string) []string {
+	env := make([]string, len(kv))
+	for k, v := range kv {
+		env = append(env, k+"="+v)
+	}
+	return env
 }

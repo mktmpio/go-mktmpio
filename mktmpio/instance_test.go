@@ -65,3 +65,33 @@ func TestCmdNoEnv(t *testing.T) {
 		t.Error("no env variables should be set", cmd.Env)
 	}
 }
+
+func TestCmdWithEnv(t *testing.T) {
+	instance := Instance{
+		ID:       "someId",
+		Host:     "some-host",
+		Port:     1234,
+		Type:     "mktmpdb",
+		Username: "user",
+		Password: "pass",
+		RemoteShell: shell{
+			Cmd: []interface{}{"tmpdbcli", "-h", "some-host", "-p", 1234},
+			Env: map[string]string{
+				"MKTMPIO-DBPASS": "pass",
+			},
+		},
+	}
+	cmd := instance.Cmd()
+	if len(cmd.Args) != 5 {
+		t.Error("cmd.Args wrong length:", len(cmd.Args))
+	}
+	if len(cmd.Env) < 1 {
+		t.Error("cmd.Env should be populated:", cmd.Env)
+	}
+	if os.Getenv("MKTMPIO-DBPASS") != "" {
+		t.Error("real environment should not already contain MKTMPIO-DBPASS")
+	}
+	if cmd.Env[len(cmd.Env)-1] != "MKTMPIO-DBPASS=pass" {
+		t.Error("required shell env var not set:", cmd.Env[len(cmd.Env)-1])
+	}
+}
