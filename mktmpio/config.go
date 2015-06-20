@@ -1,9 +1,9 @@
 package mktmpio
 
 import (
+	"github.com/mitchellh/go-homedir"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"github.com/mitchellh/go-homedir"
 )
 
 type Config struct {
