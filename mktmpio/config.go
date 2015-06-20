@@ -3,7 +3,7 @@ package mktmpio
 import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"os/user"
+	"github.com/mitchellh/go-homedir"
 )
 
 type Config struct {
@@ -12,11 +12,11 @@ type Config struct {
 
 func LoadConfig() (error, Config) {
 	config := Config{}
-	user, err := user.Current()
+	cfgPath, err := homedir.Expand("~/.mktmpio.yml")
 	if err != nil {
 		return err, config
 	}
-	cfgFile, err := ioutil.ReadFile(user.HomeDir + "/.mktmpio.yml")
+	cfgFile, err := ioutil.ReadFile(cfgPath)
 	if err != nil {
 		return err, config
 	}
