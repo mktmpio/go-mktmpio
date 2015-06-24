@@ -22,7 +22,7 @@ type Instance struct {
 }
 
 type shell struct {
-	Cmd []interface{}     `json:"cmd,omitempty"`
+	Cmd []string          `json:"cmd,omitempty"`
 	Env map[string]string `json:"env,omitempty"`
 }
 
@@ -35,11 +35,7 @@ func (i *Instance) Destroy() {
 // and environment variables required for spawning a local shell connected to
 // the remote server.
 func (i *Instance) Cmd() *exec.Cmd {
-	args := make([]string, len(i.RemoteShell.Cmd))
-	for i, a := range i.RemoteShell.Cmd {
-		args[i] = fmt.Sprintf("%v", a)
-	}
-	cmd := exec.Command(args[0], args[1:]...)
+	cmd := exec.Command(i.RemoteShell.Cmd[0], i.RemoteShell.Cmd[1:]...)
 	if len(i.RemoteShell.Env) > 0 {
 		cmd.Env = append(os.Environ(), envList(i.RemoteShell.Env)...)
 	}

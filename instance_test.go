@@ -45,7 +45,7 @@ func TestCmdNoEnv(t *testing.T) {
 		Username: "user",
 		Password: "pass",
 		RemoteShell: shell{
-			Cmd: []interface{}{"tmpdbcli", "-h", "some-host", "-p", 1234},
+			Cmd: []string{"tmpdbcli", "-h", "some-host", "-p", "1234"},
 		},
 	}
 	cmd := instance.Cmd()
@@ -75,7 +75,7 @@ func TestCmdWithEnv(t *testing.T) {
 		Username: "user",
 		Password: "pass",
 		RemoteShell: shell{
-			Cmd: []interface{}{"tmpdbcli", "-h", "some-host", "-p", 1234},
+			Cmd: []string{"tmpdbcli", "-h", "some-host", "-p", "1234"},
 			Env: map[string]string{
 				"MKTMPIO-DBPASS": "pass",
 			},
