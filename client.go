@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 )
 
 // Client provides authenticated API access for creating, listing, and destorying
@@ -38,8 +37,8 @@ func NewClient() (*Client, error) {
 // Create creates a server of the type specified by `service`.
 func (c Client) Create(service string) (*Instance, error) {
 	instance := &Instance{client: c}
-	req, _ := http.NewRequest("POST", c.url+"/new/"+service,
-		strings.NewReader(""))
+	reqURL := c.url + "/new/" + service
+	req, _ := http.NewRequest("POST", reqURL, nil)
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("X-Auth-Token", c.token)
 	resp, err := http.DefaultClient.Do(req)
@@ -64,7 +63,7 @@ func (c Client) Create(service string) (*Instance, error) {
 // Destroy shuts down and deletes the server identified by `id`.
 func (c Client) Destroy(id string) error {
 	url := c.url + "/i/" + id
-	req, _ := http.NewRequest("DELETE", url, strings.NewReader(""))
+	req, _ := http.NewRequest("DELETE", url, nil)
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("X-Auth-Token", c.token)
 	resp, err := http.DefaultClient.Do(req)
