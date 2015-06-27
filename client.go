@@ -28,16 +28,16 @@ func NewClient() (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	client := Client{
+	client := &Client{
 		token: cfg.Token,
 		url:   MktmpioURL,
 	}
-	return &client, nil
+	return client, nil
 }
 
 // Create creates a server of the type specified by `service`.
 func (c Client) Create(service string) (*Instance, error) {
-	instance := Instance{client: c}
+	instance := &Instance{client: c}
 	req, _ := http.NewRequest("POST", c.url+"/new/"+service,
 		strings.NewReader(""))
 	req.Header.Set("Accept", "application/json")
@@ -52,15 +52,14 @@ func (c Client) Create(service string) (*Instance, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = json.Unmarshal(body, &instance)
-	if err != nil {
+	if err = json.Unmarshal(body, instance); err != nil {
 		fmt.Printf("Error reading JSON %v, %s", err, body)
 		return nil, err
 	}
 	if len(instance.Error) > 0 {
 		return nil, errors.New(instance.Error)
 	}
-	return &instance, nil
+	return instance, nil
 }
 
 // Destroy shuts down and deletes the server identified by `id`.
