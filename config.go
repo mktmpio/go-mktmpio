@@ -8,7 +8,7 @@ import (
 
 // Config contains the user config options used for accessing the mktmpio API.
 type Config struct {
-	Token string `yaml:"token"`
+	Token string
 }
 
 // LoadConfig loads the configuration stored in `~/.mktmpio.yml`, returning it
