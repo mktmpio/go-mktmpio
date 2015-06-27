@@ -42,8 +42,7 @@ func (c Client) Create(service string) (*Instance, error) {
 		strings.NewReader(""))
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("X-Auth-Token", c.token)
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -68,8 +67,7 @@ func (c Client) Destroy(id string) error {
 	req, _ := http.NewRequest("DELETE", url, strings.NewReader(""))
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("X-Auth-Token", c.token)
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}
