@@ -5,7 +5,6 @@ package mktmpio
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 )
@@ -35,29 +34,31 @@ func NewClient() (*Client, error) {
 }
 
 // Create creates a server of the type specified by `service`.
-func (c Client) jsonRequest(method, path string) ([]byte, error) {
+func (c Client) jsonRequest(method, path string, instance *Instance) error {
 	reqURL := c.url + path
 	req, _ := http.NewRequest(method, reqURL, nil)
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("X-Auth-Token", c.token)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer resp.Body.Close()
-	return ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	if instance != nil {
+		return json.Unmarshal(body, instance)
+	}
+	return nil
 }
 
 // Create creates a server of the type specified by `service`.
 func (c Client) Create(service string) (*Instance, error) {
 	instance := &Instance{client: c}
 	reqURL := "/new/" + service
-	body, err := c.jsonRequest("POST", reqURL)
-	if err != nil {
-		return nil, err
-	}
-	if err = json.Unmarshal(body, instance); err != nil {
-		fmt.Printf("Error reading JSON %v, %s", err, body)
+	if err := c.jsonRequest("POST", reqURL, instance); err != nil {
 		return nil, err
 	}
 	if len(instance.Error) > 0 {
@@ -69,6 +70,5 @@ func (c Client) Create(service string) (*Instance, error) {
 // Destroy shuts down and deletes the server identified by `id`.
 func (c Client) Destroy(id string) error {
 	path := "/i/" + id
-	_, err := c.jsonRequest("DELETE", path)
-	return err
+	return c.jsonRequest("DELETE", path, nil)
 }

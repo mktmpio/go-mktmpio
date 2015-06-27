@@ -68,6 +68,18 @@ func TestBadCredentialsClient(t *testing.T) {
 	}
 }
 
+func TestClientBadJSON(t *testing.T) {
+	ts := server(t, 200, `{"omg this isn't even JSON!"}`)
+	defer ts.Close()
+	client := Client{
+		url: ts.URL,
+	}
+	_, err := client.Create("valid")
+	if err == nil {
+		t.Error("client.Create did not return an error")
+	}
+}
+
 func TestCreateDestroy(t *testing.T) {
 	mockToken := "abcdefg"
 	mockCreate := func(w http.ResponseWriter, r *http.Request) {
