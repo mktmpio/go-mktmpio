@@ -27,8 +27,8 @@ type shell struct {
 }
 
 // Destroy the server on the mktmpio service
-func (i *Instance) Destroy() {
-	i.client.Destroy(i.ID)
+func (i *Instance) Destroy() error {
+	return i.client.Destroy(i.ID)
 }
 
 // Cmd returns an exec.Cmd that is pre-populated with the command, arguments,
