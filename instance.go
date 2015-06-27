@@ -1,7 +1,6 @@
 package mktmpio
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"strconv"
@@ -59,8 +58,8 @@ func (i *Instance) LoadEnv() error {
 	return err
 }
 
-func envKey(i *Instance, field interface{}) string {
-	return strings.ToUpper(fmt.Sprintf("%s_%s", i.Type, field))
+func envKey(i *Instance, field string) string {
+	return strings.ToUpper(i.Type + "_" + field)
 }
 
 func envList(kv map[string]string) []string {
