@@ -9,15 +9,16 @@ import (
 
 // Instance represents a server that has been created on the mktmpio service.
 type Instance struct {
-	ID          string
-	Host        string
-	Port        int
-	Error       string
-	RemoteShell shell
-	Type        string
-	Username    string
-	Password    string
-	client      Client
+	ID             string
+	Host           string
+	Port           int
+	Error          string
+	RemoteShell    shell
+	Type           string
+	Username       string
+	Password       string
+	ContainerShell []string
+	client         Client
 }
 
 type shell struct {

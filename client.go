@@ -5,6 +5,8 @@ package mktmpio
 import (
 	"encoding/json"
 	"errors"
+	"golang.org/x/net/websocket"
+	"io"
 	"io/ioutil"
 	"net/http"
 )
@@ -18,6 +20,9 @@ type Client struct {
 
 // Root API url for the current version of the mktmpio HTTP API
 const MktmpioURL = "https://mktmp.io/api/v1"
+
+// Root WS url for current version of the mktmpio HTTP API
+const MktmpioWSURL = "wss://mktmp.io:8443/ws"
 
 // NewClient creates a mktmpio Client using credentials loaded from the user
 // config stored in ~/.mktmpio.yml
@@ -71,4 +76,35 @@ func (c Client) Create(service string) (*Instance, error) {
 func (c Client) Destroy(id string) error {
 	path := "/i/" + id
 	return c.jsonRequest("DELETE", path, nil)
+}
+
+// Attach creates a remote shell for the instance identified by `id` and then
+// returns a Reader and a Writer for communicating with it.
+func (c Client) Attach(id string) (io.Reader, io.Writer, error) {
+	url := MktmpioWSURL + "?id=" + id
+	cfg, err := websocket.NewConfig(url, "http://localhost/")
+	if err != nil {
+		return nil, nil, err
+	}
+	cfg.Header.Set("Accept", "application/json")
+	cfg.Header.Set("User-Agent", "mktmpio/cli")
+	cfg.Header.Set("X-Auth-Token", c.token)
+	ws, err := websocket.DialConfig(cfg)
+	return ws, ws, err
+	// if err != nil {
+	// 	return nil, nil, err
+	// 	//log.Fatal(err)
+	// }
+	// if _, err := ws.Write([]byte("hello, world!\n")); err != nil {
+	// 	return nil, nil, err
+	// 	// log.Fatal(err)
+	// }
+	// var msg = make([]byte, 512)
+	// var n int
+	// if n, err = ws.Read(msg); err != nil {
+	// 	return nil, nil, err
+	// 	// log.Fatal(err)
+	// }
+	// fmt.Printf("Received: %s.\n", msg[:n])
+	// return ws, ws, error
 }
