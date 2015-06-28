@@ -9,6 +9,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 )
 
 // Client provides authenticated API access for creating, listing, and destorying
@@ -17,12 +18,6 @@ type Client struct {
 	token string
 	url   string
 }
-
-// Root API url for the current version of the mktmpio HTTP API
-const MktmpioURL = "https://mktmp.io/api/v1"
-
-// Root WS url for current version of the mktmpio HTTP API
-const MktmpioWSURL = "wss://mktmp.io:8443/ws"
 
 // NewClient creates a mktmpio Client using credentials loaded from the user
 // config stored in ~/.mktmpio.yml
@@ -33,7 +28,7 @@ func NewClient() (*Client, error) {
 	}
 	client := &Client{
 		token: cfg.Token,
-		url:   MktmpioURL,
+		url:   cfg.URL,
 	}
 	return client, nil
 }
@@ -81,8 +76,19 @@ func (c Client) Destroy(id string) error {
 // Attach creates a remote shell for the instance identified by `id` and then
 // returns a Reader and a Writer for communicating with it.
 func (c Client) Attach(id string) (io.Reader, io.Writer, error) {
-	url := MktmpioWSURL + "?id=" + id
-	cfg, err := websocket.NewConfig(url, "http://localhost/")
+	wsURL, err := url.Parse(c.url)
+	if err != nil {
+		return nil, nil, err
+	}
+	if wsURL.Scheme == "https" {
+		wsURL.Scheme = "wss"
+		wsURL.Host = "mktmp.io:8443"
+	} else {
+		wsURL.Scheme = "ws"
+	}
+	wsURL.Path = "/ws"
+	wsURL.RawQuery = "id=" + id
+	cfg, err := websocket.NewConfig(wsURL.String(), "http://localhost/")
 	if err != nil {
 		return nil, nil, err
 	}
