@@ -15,8 +15,9 @@ import (
 // Client provides authenticated API access for creating, listing, and destorying
 // database servers.
 type Client struct {
-	token string
-	url   string
+	token     string
+	url       string
+	UserAgent string
 }
 
 // NewClient creates a mktmpio Client using credentials loaded from the user
@@ -27,8 +28,9 @@ func NewClient() (*Client, error) {
 		return nil, err
 	}
 	client := &Client{
-		token: cfg.Token,
-		url:   cfg.URL,
+		token:     cfg.Token,
+		url:       cfg.URL,
+		UserAgent: "go-mktmpio",
 	}
 	return client, nil
 }
@@ -38,6 +40,7 @@ func (c Client) jsonRequest(method, path string, instance *Instance) error {
 	reqURL := c.url + path
 	req, _ := http.NewRequest(method, reqURL, nil)
 	req.Header.Set("Accept", "application/json")
+	req.Header.Set("User-Agent", c.UserAgent)
 	req.Header.Set("X-Auth-Token", c.token)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -93,7 +96,7 @@ func (c Client) Attach(id string) (io.Reader, io.Writer, error) {
 		return nil, nil, err
 	}
 	cfg.Header.Set("Accept", "application/json")
-	cfg.Header.Set("User-Agent", "mktmpio/cli")
+	cfg.Header.Set("User-Agent", "go-mktmpio")
 	cfg.Header.Set("X-Auth-Token", c.token)
 	ws, err := websocket.DialConfig(cfg)
 	return ws, ws, err

@@ -8,6 +8,9 @@ import (
 
 func server(t *testing.T, status int, body string) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("User-Agent") != "go-mktmpio" {
+			t.Error("default UserAgent not used")
+		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
 		w.Write([]byte(body))
@@ -28,6 +31,9 @@ func TestNewClient(t *testing.T) {
 	if len(client.url) < 10 {
 		t.Error("client.url too short:", client.url)
 	}
+	if client.UserAgent != "go-mktmpio" {
+		t.Error("client.UserAgent is not default:", client.UserAgent)
+	}
 }
 
 func TestClientCreate(t *testing.T) {
@@ -45,6 +51,22 @@ func TestClientCreate(t *testing.T) {
 	if instance != nil {
 		t.Error("client.Create returned an instance:", instance)
 	}
+}
+
+func TestClientOptions(t *testing.T) {
+	client, err := NewClient()
+	if err != nil {
+		t.Error("NewClient returned an error")
+	}
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("User-Agent") != "my custom user agent" {
+			t.Error("custome UserAgent not used")
+		}
+	}))
+	defer ts.Close()
+	client.url = ts.URL
+	client.UserAgent = "my custom user agent"
+	client.Create("whatever")
 }
 
 func TestBadCredentialsClient(t *testing.T) {
@@ -71,9 +93,8 @@ func TestBadCredentialsClient(t *testing.T) {
 func TestClientBadJSON(t *testing.T) {
 	ts := server(t, 200, `{"omg this isn't even JSON!"}`)
 	defer ts.Close()
-	client := Client{
-		url: ts.URL,
-	}
+	client, _ := NewClient()
+	client.url = ts.URL
 	_, err := client.Create("valid")
 	if err == nil {
 		t.Error("client.Create did not return an error")
@@ -122,10 +143,9 @@ func TestCreateDestroy(t *testing.T) {
 		}
 	}))
 	defer ts.Close()
-	client := Client{
-		url:   ts.URL,
-		token: mockToken,
-	}
+	client, _ := NewClient()
+	client.url = ts.URL
+	client.token = mockToken
 	instance, err := client.Create("db")
 	if err != nil {
 		t.Error("Error creating instance:", err)
