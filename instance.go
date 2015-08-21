@@ -52,15 +52,15 @@ func (i *Instance) LoadEnv() error {
 			err = os.Setenv(envKey(i, key), val)
 		}
 	}
-	setEnv("host", i.Host)
-	setEnv("port", strconv.Itoa(i.Port))
-	setEnv("username", i.Username)
-	setEnv("password", i.Password)
+	setEnv("HOST", i.Host)
+	setEnv("PORT", strconv.Itoa(i.Port))
+	setEnv("USERNAME", i.Username)
+	setEnv("PASSWORD", i.Password)
 	return err
 }
 
 func envKey(i *Instance, field string) string {
-	return strings.ToUpper(i.Type + "_" + field)
+	return strings.ToUpper(i.Type) + "_" + field
 }
 
 func envList(kv map[string]string) []string {
