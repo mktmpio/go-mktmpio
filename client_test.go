@@ -6,6 +6,10 @@ import (
 	"testing"
 )
 
+var testConfig = &Config{
+	Token: "1234-5678-90abcdef",
+}
+
 func server(t *testing.T, status int, body string) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("User-Agent") != "go-mktmpio" {
@@ -18,7 +22,7 @@ func server(t *testing.T, status int, body string) *httptest.Server {
 }
 
 func TestNewClient(t *testing.T) {
-	client, err := NewClient()
+	client, err := NewClient(testConfig)
 	if err != nil {
 		t.Error("NewClient returned an error:", err)
 	}
@@ -37,7 +41,7 @@ func TestNewClient(t *testing.T) {
 }
 
 func TestClientCreate(t *testing.T) {
-	client, err := NewClient()
+	client, err := NewClient(testConfig)
 	if err != nil {
 		t.Error("NewClient returned an error")
 	}
@@ -54,7 +58,7 @@ func TestClientCreate(t *testing.T) {
 }
 
 func TestClientOptions(t *testing.T) {
-	client, err := NewClient()
+	client, err := NewClient(testConfig)
 	if err != nil {
 		t.Error("NewClient returned an error")
 	}
@@ -70,7 +74,7 @@ func TestClientOptions(t *testing.T) {
 }
 
 func TestBadCredentialsClient(t *testing.T) {
-	client, err := NewClient()
+	client, err := NewClient(testConfig)
 	if err != nil {
 		t.Error("NewClient returned an error")
 	}
@@ -93,7 +97,7 @@ func TestBadCredentialsClient(t *testing.T) {
 func TestClientBadJSON(t *testing.T) {
 	ts := server(t, 200, `{"omg this isn't even JSON!"}`)
 	defer ts.Close()
-	client, _ := NewClient()
+	client, _ := NewClient(testConfig)
 	client.url = ts.URL
 	_, err := client.Create("valid")
 	if err == nil {
@@ -143,7 +147,7 @@ func TestCreateDestroy(t *testing.T) {
 		}
 	}))
 	defer ts.Close()
-	client, _ := NewClient()
+	client, _ := NewClient(testConfig)
 	client.url = ts.URL
 	client.token = mockToken
 	instance, err := client.Create("db")

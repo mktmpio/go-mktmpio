@@ -22,15 +22,14 @@ type Client struct {
 
 // NewClient creates a mktmpio Client using credentials loaded from the user
 // config stored in ~/.mktmpio.yml
-func NewClient() (*Client, error) {
-	cfg, err := LoadConfig()
-	if err != nil {
-		return nil, err
-	}
+func NewClient(cfg *Config) (*Client, error) {
 	client := &Client{
 		token:     cfg.Token,
 		url:       cfg.URL,
 		UserAgent: "go-mktmpio",
+	}
+	if client.url == "" {
+		client.url = MktmpioURL
 	}
 	return client, nil
 }
