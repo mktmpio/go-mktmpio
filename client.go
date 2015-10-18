@@ -12,6 +12,11 @@ import (
 	"net/url"
 )
 
+// go-1.2 does not automatically load SHA2-384, which is what parts of
+// mktmp.io's cert chain use.
+// See also: http://bridge.grumpy-troll.org/2014/05/golang-tls-comodo/
+import _ "crypto/sha512" // side-effect only
+
 // Client provides authenticated API access for creating, listing, and destorying
 // database servers.
 type Client struct {
