@@ -1,6 +1,7 @@
 package mktmpio
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -157,4 +158,81 @@ func TestCreateDestroy(t *testing.T) {
 	if err = instance.Destroy(); err != nil {
 		t.Error("Error destroying instance:", err)
 	}
+}
+
+func TestAttach(t *testing.T) {
+	cfg := LoadConfig()
+	if cfg.Token == "" {
+		t.Skipf("requires a real token to connect to the real service")
+		return
+	}
+	msg := make([]byte, 64)
+	client, err := NewClient(cfg)
+	redis, err := client.Create("redis")
+	if err != nil {
+		t.Fatal("Error creating redis instance for attach test", err)
+	}
+	defer redis.Destroy()
+	rw, err := client.Attach(redis.ID)
+	if err != nil {
+		t.Fatal("Error attaching to redis instance", err)
+	}
+	read := func() {
+		if n, err := rw.Read(msg); err != nil {
+			t.Error("Failed to read prompt from websocket", err)
+		} else if n == 0 {
+			t.Error("Nothing was readable from websocket")
+		} else {
+			if testing.Verbose() {
+				println("read:", tty(msg[:n]))
+			}
+			t.Log("Read:", n, tty(msg[:n]))
+		}
+	}
+	write := func(b []byte) {
+		if n, err := rw.Write(b); err != nil {
+			t.Error("Failed to write command to websocket", err)
+		} else if n == 0 {
+			t.Error("Nowthing was written to websocket")
+		} else {
+			if testing.Verbose() {
+				println("wrote:", tty(b))
+			}
+			t.Log("Wrote:", tty(b))
+		}
+	}
+	// <ESC>[6n - requests a report cursor position
+	read()
+	// <ESC>[0;0R - respond with location 0,0
+	write([]byte("\x1b[1;1R"))
+	// <ESC>[999C<ESC>[6n - move cursor 999, report position
+	read()
+	// <ESC>[0;0R - report we are at 39,12
+	write([]byte("\x1b[12;39R"))
+	read()
+	write([]byte("scan 0\r\n"))
+	read()
+	write([]byte("exit\r\n"))
+	read()
+	if err := rw.Close(); err != nil {
+		t.Error("Did not close cleanly", err)
+	}
+}
+
+func tty(b []byte) string {
+	s := ""
+	for _, c := range b {
+		if c == 0x1B {
+			s += "<ESC>"
+		} else if c == 0x0D {
+			s += "<CR>"
+		} else if c == 0x0A {
+			s += "<LF>"
+		} else if c > 31 && c < 127 {
+			s += fmt.Sprintf("%c", c)
+		} else {
+			s += fmt.Sprintf("<%02X>", c)
+		}
+	}
+	return s
 }
