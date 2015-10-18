@@ -10,33 +10,84 @@ import (
 // Root API url for the current version of the mktmpio HTTP API
 const MktmpioURL = "https://mktmp.io/api/v1"
 
+// Path to the user's config
+const MKtmpioCfgFile = "~/.mktmpio.yml"
+
 // Config contains the user config options used for accessing the mktmpio API.
 type Config struct {
 	Token string
-	URL   string
+	URL   string `yaml:",omitempty"`
+	err   error
 }
 
 // LoadConfig loads the configuration stored in `~/.mktmpio.yml`, returning it
 // as a Config type instance.
-func LoadConfig() (Config, error) {
+func LoadConfig() *Config {
 	config := Config{}
-	cfgPath, err := homedir.Expand("~/.mktmpio.yml")
-	if err != nil {
-		return config, err
-	}
+	defConf := DefaultConfig()
+	file := FileConfig(ConfigPath())
+	env := EnvConfig()
+	return config.Apply(defConf).Apply(file).Apply(env)
+}
+
+// DefaultConfig returns a configuration with only the default values set
+func DefaultConfig() *Config {
+	config := new(Config)
+	config.URL = MktmpioURL
+	return config
+}
+
+// EnvConfig returns a configuration with only values provided by environment variables
+func EnvConfig() *Config {
+	config := new(Config)
+	config.Token = os.Getenv("MKTMPIO_TOKEN")
+	config.URL = os.Getenv("MKTMPIO_URL")
+	return config
+}
+
+// FileConfig returns a configuration with any values provided by the given YAML config file
+func FileConfig(cfgPath string) *Config {
+	config := new(Config)
 	cfgFile, err := ioutil.ReadFile(cfgPath)
 	if err != nil {
-		return config, err
+		config.err = err
+	} else {
+		config.err = yaml.Unmarshal(cfgFile, config)
 	}
-	err = yaml.Unmarshal(cfgFile, &config)
-	if os.Getenv("MKTMPIO_TOKEN") != "" {
-		config.Token = os.Getenv("MKTMPIO_TOKEN")
+	return config
+}
+
+// Apply creates a new Config with non-empty values from the provided Config
+// overriding the options of the base Config
+func (c *Config) Apply(b *Config) *Config {
+	newCfg := new(Config)
+	if b.Token == "" {
+		newCfg.Token = c.Token
+	} else {
+		newCfg.Token = b.Token
 	}
-	if os.Getenv("MKTMPIO_URL") != "" {
-		config.URL = os.Getenv("MKTMPIO_URL")
+	if b.URL == "" {
+		newCfg.URL = c.URL
+	} else {
+		newCfg.URL = b.URL
 	}
-	if config.URL == "" {
-		config.URL = MktmpioURL
+	return newCfg
+}
+
+// ConfigPath returns the path to the user config file
+func ConfigPath() string {
+	if path, err := homedir.Expand(MKtmpioCfgFile); err == nil {
+		return path
 	}
-	return config, err
+	return ""
+}
+
+// Save stores the given configuration in ~/.mktmpio.yml, overwriting the
+// current contents if the file exists.
+func (c *Config) Save(cfgPath string) error {
+	cfgFile, err := yaml.Marshal(c)
+	if err == nil {
+		err = ioutil.WriteFile(cfgPath, cfgFile, 0600)
+	}
+	return err
 }

@@ -1,6 +1,8 @@
 language: go
 
-before_script: 'echo "token: fake-token" > ~/.mktmpio.yml'
+env:
+  - secure: xA8Ud/iBvSUNaOw0vv6YetMLYWZEM2yFwDe/3bZe3L7cyMhtbkugKoLCKunz2NxckKx3dA41wsAFoIW0LJVSFEzcg5XIJVllz3BU4vt47T8tLHv8RLvpggVJROH5eagJOC02SL8Hf2dsQeLWT97pTbmlS1lherM/+Ph4r6/k/v6XMXnghSfA/1rF3w0G8HichMHqmZWhDAd3MFRYqASPUQ+BmU+9wXUzSv45OWJQznUJxOoBKvy4g0bJMZfZ9zIPdX+gqjMAz0/ozpLnq2OATdVpg4Q6RzVJ/TWxPAWcfNQhbCXItyNak+7VIeh3LdeHjdHeJd0OzhLGsvi+4DEtHWGDyTdNuCoEDc7fKlymm9KyR+fveZJ/s8A74SC3AIY3lJRG48DW9F1cRyDpaeJFJHUmxysnrtuEeEWVMu6tCPktGeOrpGHIBZEPBIEFvGwLIbkCCe3cKt4by92Ejo7VvjcQvi6YikMtmono5liOXfFsM9373sOJv3IqnTUf8RW3Kqmve3vi97aowS2lG94guGmGlViTPsvUk+qPEgYIRKhJLGFqH8043W2vtdTx58IIAegioW5dy/NWq8dNu+V9hN9dTMV3uuTd50J+6ku7QedUj75sKMw6RZxzj697joSfq2wxM4IqbN1k2LZErD34+vMsPV9DOby8T3ztfKKtJKw=
+
 go:
   - 1.2
   - 1.3
