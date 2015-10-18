@@ -77,10 +77,10 @@ func (c Client) Destroy(id string) error {
 
 // Attach creates a remote shell for the instance identified by `id` and then
 // returns a Reader and a Writer for communicating with it.
-func (c Client) Attach(id string) (io.Reader, io.Writer, error) {
+func (c Client) Attach(id string) (io.ReadWriteCloser, error) {
 	wsURL, err := url.Parse(c.url)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	if wsURL.Scheme == "https" {
 		wsURL.Scheme = "wss"
@@ -92,11 +92,10 @@ func (c Client) Attach(id string) (io.Reader, io.Writer, error) {
 	wsURL.RawQuery = "id=" + id
 	cfg, err := websocket.NewConfig(wsURL.String(), "http://localhost/")
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	cfg.Header.Set("Accept", "application/json")
 	cfg.Header.Set("User-Agent", "go-mktmpio")
 	cfg.Header.Set("X-Auth-Token", c.token)
-	ws, err := websocket.DialConfig(cfg)
-	return ws, ws, err
+	return websocket.DialConfig(cfg)
 }
