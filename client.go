@@ -1,3 +1,7 @@
+// Copyright 2015 Datajin Technologies, Inc. All rights reserved.
+// Use of this source code is governed by an Artistic-2
+// license that can be found in the LICENSE file.
+
 // Package mktmpio provides easy access to the database servier provisioning
 // services at https://mktmp.io/
 package mktmpio

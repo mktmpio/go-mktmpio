@@ -1,3 +1,7 @@
+// Copyright 2015 Datajin Technologies, Inc. All rights reserved.
+// Use of this source code is governed by an Artistic-2
+// license that can be found in the LICENSE file.
+
 package mktmpio
 
 import (
