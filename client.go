@@ -9,6 +9,7 @@ package mktmpio
 import (
 	"encoding/json"
 	"errors"
+	"github.com/docker/docker/pkg/stdcopy"
 	"golang.org/x/net/websocket"
 	"io"
 	"io/ioutil"
@@ -84,9 +85,42 @@ func (c Client) Destroy(id string) error {
 	return c.jsonRequest("DELETE", path, nil)
 }
 
+// AttachStdio creates a remote shell for the instance identified by `id` and
+// returns an io.WriteCloser for that shell's stdin and an io.Reader for each of
+// stdout and stderr on that shell. This is for non-interactive shells, like one
+// would use for piping a script into a shell or for piping the output from.
+func (c Client) AttachStdio(id string) (io.WriteCloser, io.Reader, io.Reader, error) {
+	conn, err := c.attachWS(id, true)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	inReader, inWriter := io.Pipe()
+	outReader, outWriter := io.Pipe()
+	errReader, errWriter := io.Pipe()
+	go func() {
+		// stdcopy is Docker's demuxer for their stdout/stderr multiplexed stream
+		stdcopy.StdCopy(outWriter, errWriter, conn)
+		errWriter.Close()
+		outWriter.Close()
+	}()
+	go func() {
+		io.Copy(conn, inReader)
+		// A cheap hack sentinel value to indicate EOF to the server without closing
+		// the actual connection. This would be so much easier with plain TCP :-(
+		conn.Write([]byte{255, 255, 255, 255})
+	}()
+	return inWriter, outReader, errReader, err
+}
+
 // Attach creates a remote shell for the instance identified by `id` and then
-// returns a Reader and a Writer for communicating with it.
+// returns a Reader and a Writer for communicating with it via a psuedo-TTY. The
+// bytes read from the channel will include TTY control sequences. This type of
+// connection is most appropriate for connecting directly to a local TTY.
 func (c Client) Attach(id string) (io.ReadWriteCloser, error) {
+	return c.attachWS(id, false)
+}
+
+func (c Client) attachWS(id string, stdio bool) (*websocket.Conn, error) {
 	wsURL, err := url.Parse(c.url)
 	if err != nil {
 		return nil, err
@@ -98,7 +132,14 @@ func (c Client) Attach(id string) (io.ReadWriteCloser, error) {
 		wsURL.Scheme = "ws"
 	}
 	wsURL.Path = "/ws"
-	wsURL.RawQuery = "id=" + id
+	params := url.Values{}
+	params.Set("id", id)
+	if stdio {
+		params.Set("stdio", "true")
+	} else {
+		params.Set("stdio", "false")
+	}
+	wsURL.RawQuery = params.Encode()
 	cfg, err := websocket.NewConfig(wsURL.String(), "http://localhost/")
 	if err != nil {
 		return nil, err
@@ -106,5 +147,9 @@ func (c Client) Attach(id string) (io.ReadWriteCloser, error) {
 	cfg.Header.Set("Accept", "application/json")
 	cfg.Header.Set("User-Agent", "go-mktmpio")
 	cfg.Header.Set("X-Auth-Token", c.token)
-	return websocket.DialConfig(cfg)
+	conn, err := websocket.DialConfig(cfg)
+	if err == nil {
+		conn.PayloadType = websocket.BinaryFrame
+	}
+	return conn, err
 }
