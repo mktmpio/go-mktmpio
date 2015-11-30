@@ -24,6 +24,11 @@ type Config struct {
 	err   error
 }
 
+func (c Config) String() string {
+	bytes, _ := yaml.Marshal(c)
+	return string(bytes)
+}
+
 // LoadConfig loads the configuration stored in `~/.mktmpio.yml`, returning it
 // as a Config type instance.
 func LoadConfig() *Config {

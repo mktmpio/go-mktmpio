@@ -80,3 +80,18 @@ func TestConfigSave(t *testing.T) {
 	}
 	testEquivalent(t, c, from)
 }
+
+func TestConfigStringer(t *testing.T) {
+	c := new(Config)
+	if c.String() != "token: \"\"\n" {
+		t.Errorf("expected '%s' to be '%s'", c, "token: \"\"\n")
+	}
+	c.Token = "NEW TOKEN"
+	if c.String() != "token: NEW TOKEN\n" {
+		t.Errorf("expected '%s' to be '%s'", c, "token: NEW TOKEN\n")
+	}
+	c.URL = "http://url/here"
+	if c.String() != "token: NEW TOKEN\nurl: http://url/here\n" {
+		t.Errorf("expected '%s' to be '%s'", c, "token: NEW TOKEN\nurl: http://url/here\n")
+	}
+}
