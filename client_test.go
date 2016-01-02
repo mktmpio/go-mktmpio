@@ -131,6 +131,43 @@ func TestClientBadJSON(t *testing.T) {
 	}
 }
 
+func TestClientListError(t *testing.T) {
+	client, err := NewClient(testConfig)
+	if err != nil {
+		t.Error("NewClient returned an error")
+	}
+	ts := server(t, 400, `{"error": "bad request"}`)
+	defer ts.Close()
+	client.url = ts.URL
+	instances, err := client.List()
+	if err == nil {
+		t.Error("client.List did not return an error")
+	}
+	if instances != nil {
+		t.Error("client.List returned an instance:", instances)
+	}
+}
+
+func TestClientListEmpty(t *testing.T) {
+	client, err := NewClient(testConfig)
+	if err != nil {
+		t.Error("NewClient returned an error")
+	}
+	ts := server(t, 200, `[]`)
+	defer ts.Close()
+	client.url = ts.URL
+	instances, err := client.List()
+	if err != nil {
+		t.Error("client.List returned an error")
+	}
+	if instances == nil {
+		t.Error("client.List returned nil instead of empty slice")
+	}
+	if len(instances) != 0 {
+		t.Error("client.List returned a non-empty list:", instances)
+	}
+}
+
 func TestCreateDestroy(t *testing.T) {
 	mockToken := "abcdefg"
 	mockCreate := func(w http.ResponseWriter, r *http.Request) {

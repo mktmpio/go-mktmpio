@@ -89,6 +89,17 @@ func (c Client) Create(service string) (*Instance, error) {
 	return instance, nil
 }
 
+// List generates retrieves a list of curently running instances
+func (c Client) List() ([]Instance, error) {
+	reqURL := "/i"
+	instances := []Instance{}
+	err := c.jsonRequest("GET", reqURL, &instances)
+	if err != nil {
+		return nil, err
+	}
+	return instances, nil
+}
+
 // Destroy shuts down and deletes the server identified by `id`.
 func (c Client) Destroy(id string) error {
 	path := "/i/" + id
