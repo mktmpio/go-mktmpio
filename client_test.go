@@ -12,9 +12,10 @@ import (
 	"testing"
 )
 
-var testConfig = &Config{
-	Token: "1234-5678-90abcdef",
-}
+var (
+	testConfig   = &Config{Token: "1234-5678-90abcdef"}
+	badURLConfig = &Config{URL: "https://bad-host/api/invalid-encoding:%b%a%d"}
+)
 
 func server(t *testing.T, status int, body string) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -43,6 +44,14 @@ func TestNewClient(t *testing.T) {
 	}
 	if client.UserAgent != "go-mktmpio" {
 		t.Error("client.UserAgent is not default:", client.UserAgent)
+	}
+}
+
+func TestClientRequest(t *testing.T) {
+	client, _ := NewClient(badURLConfig)
+	req, err := client.newRequest("", "")
+	if err == nil || req != nil {
+		t.Error("client.newRequest should error when client has bad url", err, req)
 	}
 }
 
@@ -97,6 +106,17 @@ func TestBadCredentialsClient(t *testing.T) {
 	}
 	if instance != nil {
 		t.Error("client.Create returned an instance:", instance)
+	}
+}
+
+func TestClientServerGone(t *testing.T) {
+	ts := server(t, 200, `[]`)
+	client, _ := NewClient(testConfig)
+	client.url = ts.URL
+	ts.Close()
+	_, err := client.Create("doesn't matter")
+	if err == nil {
+		t.Error("client.Create did not return an error")
 	}
 }
 

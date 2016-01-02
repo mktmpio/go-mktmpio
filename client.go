@@ -44,26 +44,36 @@ func NewClient(cfg *Config) (*Client, error) {
 	return client, nil
 }
 
+// NewRequest creates an http.Request based on the Client's configuration. The
+// created request object is suitable for passing to http.Client.Do()
+func (c Client) newRequest(method, path string) (*http.Request, error) {
+	req, err := http.NewRequest(method, c.url+path, nil)
+	if req != nil {
+		req.Header.Set("Accept", "application/json")
+		req.Header.Set("User-Agent", c.UserAgent)
+		req.Header.Set("X-Auth-Token", c.token)
+	}
+	return req, err
+}
+
 // Create creates a server of the type specified by `service`.
-func (c Client) jsonRequest(method, path string, instance *Instance) error {
-	reqURL := c.url + path
-	req, _ := http.NewRequest(method, reqURL, nil)
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("User-Agent", c.UserAgent)
-	req.Header.Set("X-Auth-Token", c.token)
+func (c Client) rawRequest(method, path string) ([]byte, error) {
+	req, _ := c.newRequest(method, path)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
+	return ioutil.ReadAll(resp.Body)
+}
+
+// Create creates a server of the type specified by `service`.
+func (c Client) jsonRequest(method, path string, instance interface{}) error {
+	body, err := c.rawRequest(method, path)
+	if err != nil || instance == nil {
 		return err
 	}
-	if instance != nil {
-		return json.Unmarshal(body, instance)
-	}
-	return nil
+	return json.Unmarshal(body, instance)
 }
 
 // Create creates a server of the type specified by `service`.
