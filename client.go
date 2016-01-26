@@ -7,6 +7,7 @@
 package mktmpio
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"github.com/docker/docker/pkg/stdcopy"
@@ -93,6 +94,11 @@ func (c Client) jsonRequest(method, path string, instance interface{}) error {
 	err = json.Unmarshal(body, instance)
 	if err != nil {
 		c.log().Printf("res: %s", body)
+		if bytes.HasPrefix(body, []byte(`{"error":`)) {
+			err = errors.New(string(body[10 : len(body)-2]))
+		} else {
+			err = errors.New(err.Error() + string(body))
+		}
 	}
 	return err
 }
