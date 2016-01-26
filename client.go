@@ -13,6 +13,7 @@ import (
 	"golang.org/x/net/websocket"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 )
@@ -28,7 +29,10 @@ type Client struct {
 	token     string
 	url       string
 	UserAgent string
+	logger    *log.Logger
 }
+
+var devNull = log.New(ioutil.Discard, "", 0)
 
 // NewClient creates a mktmpio Client using credentials loaded from the user
 // config stored in ~/.mktmpio.yml
@@ -42,6 +46,18 @@ func NewClient(cfg *Config) (*Client, error) {
 		client.url = MktmpioURL
 	}
 	return client, nil
+}
+
+// SetLogger sets the logger to be used for verbose logging of errors
+func (c *Client) SetLogger(logger *log.Logger) {
+	c.logger = logger
+}
+
+func (c Client) log() *log.Logger {
+	if c.logger == nil {
+		return devNull
+	}
+	return c.logger
 }
 
 // NewRequest creates an http.Request based on the Client's configuration. The
@@ -61,6 +77,7 @@ func (c Client) rawRequest(method, path string) ([]byte, error) {
 	req, _ := c.newRequest(method, path)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
+		c.log().Printf("req: %+v", req)
 		return nil, err
 	}
 	defer resp.Body.Close()
@@ -73,7 +90,11 @@ func (c Client) jsonRequest(method, path string, instance interface{}) error {
 	if err != nil || instance == nil {
 		return err
 	}
-	return json.Unmarshal(body, instance)
+	err = json.Unmarshal(body, instance)
+	if err != nil {
+		c.log().Printf("res: %s", body)
+	}
+	return err
 }
 
 // Create creates a server of the type specified by `service`.
@@ -144,6 +165,7 @@ func (c Client) Attach(id string) (io.ReadWriteCloser, error) {
 func (c Client) attachWS(id string, stdio bool) (*websocket.Conn, error) {
 	wsURL, err := url.Parse(c.url)
 	if err != nil {
+		c.log().Printf("error parsing url: %s: %s", c.url, err)
 		return nil, err
 	}
 	if wsURL.Scheme == "https" {
@@ -163,13 +185,16 @@ func (c Client) attachWS(id string, stdio bool) (*websocket.Conn, error) {
 	wsURL.RawQuery = params.Encode()
 	cfg, err := websocket.NewConfig(wsURL.String(), "http://localhost/")
 	if err != nil {
+		c.log().Printf("error initializing websocket: %s: %s", wsURL, err)
 		return nil, err
 	}
 	cfg.Header.Set("Accept", "application/json")
 	cfg.Header.Set("User-Agent", "go-mktmpio")
 	cfg.Header.Set("X-Auth-Token", c.token)
 	conn, err := websocket.DialConfig(cfg)
-	if err == nil {
+	if err != nil {
+		c.log().Printf("error dialing websocket: %+v: %s", cfg, err)
+	} else {
 		conn.PayloadType = websocket.BinaryFrame
 	}
 	return conn, err
