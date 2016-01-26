@@ -148,6 +148,23 @@ func TestClientListError(t *testing.T) {
 	}
 }
 
+func TestClientListAuthError(t *testing.T) {
+	client, err := NewClient(testConfig)
+	if err != nil {
+		t.Error("NewClient returned an error")
+	}
+	ts := server(t, 401, `{"error": "Authentication required"}`)
+	defer ts.Close()
+	client.url = ts.URL
+	instances, err := client.List()
+	if err == nil {
+		t.Error("client.List did not return an error")
+	}
+	if instances != nil {
+		t.Error("client.List returned an instance:", instances)
+	}
+}
+
 func TestClientListEmpty(t *testing.T) {
 	client, err := NewClient(testConfig)
 	if err != nil {
