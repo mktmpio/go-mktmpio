@@ -1,6 +1,11 @@
+Copyright (c) Datajin Technologies, Inc. 2015,2016. All rights reserved.
+This project is licensed under the Artistic License 2.0, full text below.
+
+--------
+
                The Artistic License 2.0
 
-           Copyright (c) 2015 mktmp.io
+           Copyright (c) 2000-2006, The Perl Foundation.
 
      Everyone is permitted to copy and distribute verbatim copies
       of this license document, but changing it is not allowed.
@@ -199,4 +204,3 @@ LAW. UNLESS REQUIRED BY LAW, NO COPYRIGHT HOLDER OR CONTRIBUTOR WILL
 BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
 DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THE PACKAGE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
