@@ -5,16 +5,17 @@
 package mktmpio
 
 import (
-	"github.com/mitchellh/go-homedir"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
+
+	"github.com/mitchellh/go-homedir"
+	"gopkg.in/yaml.v2"
 )
 
-// Root API url for the current version of the mktmpio HTTP API
+// MktmpioURL is the root of the current version of the mktmpio HTTP API
 const MktmpioURL = "https://mktmp.io/api/v1"
 
-// Path to the user's config
+// MKtmpioCfgFile is the path to the user's config
 const MKtmpioCfgFile = "~/.mktmpio.yml"
 
 // Config contains the user config options used for accessing the mktmpio API.

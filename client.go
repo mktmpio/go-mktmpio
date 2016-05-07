@@ -10,13 +10,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/docker/docker/pkg/stdcopy"
-	"golang.org/x/net/websocket"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
+
+	"github.com/docker/docker/pkg/stdcopy"
+	"golang.org/x/net/websocket"
 )
 
 // go-1.2 does not automatically load SHA2-384, which is what parts of
