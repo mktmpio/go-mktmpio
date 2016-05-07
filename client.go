@@ -25,7 +25,7 @@ import (
 // See also: http://bridge.grumpy-troll.org/2014/05/golang-tls-comodo/
 import _ "crypto/sha512" // side-effect only
 
-// Client provides authenticated API access for creating, listing, and destorying
+// Client provides authenticated API access for creating, listing, and destroying
 // database servers.
 type Client struct {
 	token     string
@@ -162,7 +162,7 @@ func (c Client) AttachStdio(id string) (io.WriteCloser, io.Reader, io.Reader, er
 }
 
 // Attach creates a remote shell for the instance identified by `id` and then
-// returns a Reader and a Writer for communicating with it via a psuedo-TTY. The
+// returns a Reader and a Writer for communicating with it via a pseudo-TTY. The
 // bytes read from the channel will include TTY control sequences. This type of
 // connection is most appropriate for connecting directly to a local TTY.
 func (c Client) Attach(id string) (io.ReadWriteCloser, error) {
