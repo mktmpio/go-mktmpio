@@ -177,7 +177,6 @@ func (c Client) attachWS(id string, stdio bool) (*websocket.Conn, error) {
 	}
 	if wsURL.Scheme == "https" {
 		wsURL.Scheme = "wss"
-		wsURL.Host = "mktmp.io:8443"
 	} else {
 		wsURL.Scheme = "ws"
 	}
