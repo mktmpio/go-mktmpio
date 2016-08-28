@@ -16,7 +16,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/docker/docker/pkg/stdcopy"
+	"github.com/mktmpio/go-mktmpio/stdcopy"
 	"golang.org/x/net/websocket"
 )
 
