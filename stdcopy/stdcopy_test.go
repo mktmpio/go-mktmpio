@@ -1,3 +1,6 @@
+// Copyright 2013-2016 Docker, Inc.
+// Licensed under the Apache License, Version 2.0 (the "License")
+
 package stdcopy
 
 import (
