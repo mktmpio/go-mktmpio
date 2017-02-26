@@ -9,7 +9,7 @@ See [API documentation](https://godoc.org/github.com/mktmpio/go-mktmpio).
 
 ## Legal
 
-This software is copyright &copy; Datajin Technologies, Inc. 2015,2016 and Open
+This software is copyright &copy; Datajin Technologies, Inc. 2015,2017 and Open
 Source under the terms of Artistic License 2.0 that can be found in the LICENSE
 file.
 
@@ -18,4 +18,4 @@ Use of the mktmpio service is subject to the
 [mktmpio Terms of Service policy](https://mktmp.io/terms-of-service).
 
 ---
-Copyright &copy; Datajin Technologies, Inc. 2015,2016. All rights reserved.
+Copyright &copy; Datajin Technologies, Inc. 2015,2017. All rights reserved.
