@@ -1,4 +1,4 @@
-// Copyright Datajin Technologies, Inc. 2015,2016. All rights reserved.
+// Copyright Datajin Technologies, Inc. 2015,2017. All rights reserved.
 // Use of this source code is governed by an Artistic-2
 // license that can be found in the LICENSE file.
 
@@ -246,7 +246,7 @@ func TestAttach(t *testing.T) {
 		return
 	}
 	msg := make([]byte, 64)
-	client, err := NewClient(cfg)
+	client, _ := NewClient(cfg)
 	redis, err := client.Create("redis")
 	if err != nil {
 		t.Fatal("Error creating redis instance for attach test", err)
@@ -281,7 +281,7 @@ func TestAttachStdio(t *testing.T) {
 		return
 	}
 	msg := make([]byte, 64)
-	client, err := NewClient(cfg)
+	client, _ := NewClient(cfg)
 	redis, err := client.Create("redis")
 	if err != nil {
 		t.Fatal("Error creating redis instance for attach test", err)
